@@ -11,6 +11,7 @@ class my_normalizer:
         #     axis = 1: normalize columns
         self.norm = norm
         self.axis = axis
+        
 
     def fit(self, X):
         #     X: input matrix
