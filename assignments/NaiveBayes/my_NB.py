@@ -50,6 +50,7 @@ class my_NB:
         # return probs = pd.DataFrame(list of prob, columns = self.classes_)                
         # P(yj|x) = P(x|yj)P(yj)/P(x)
         # write your code below
+        
 
         probs = {label: [] for label in self.classes_}
 
