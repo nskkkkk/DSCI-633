@@ -50,23 +50,25 @@ class my_NB:
         # return probs = pd.DataFrame(list of prob, columns = self.classes_)                
         # P(yj|x) = P(x|yj)P(yj)/P(x)
         # write your code below
+
+        probabilities = {label: [] for label in self.classes_}
+
+        for index, row in X.iterrows():
+            for label in self.classes_:
+                probability = np.log(self.P_y[label])
+                for feature in X.columns:
+                    value = row[feature]
+                    if value in self.P[label][feature]:
+                        probability += np.log(self.P[label][feature][value])
+                probabilities[label].append(probability)
+
+        probabilities_df = pd.DataFrame(probabilities, columns=self.classes_)
+        probabilities_df = np.exp(probabilities_df)
+        probabilities_df = probabilities_df.div(probabilities_df.sum(axis=1), axis=0)
+        
+        return probabilities_df
         
 
-        probs = {label: [] for label in self.classes_}
-
-        for i, rows in X.iterrows():
-            for labels in self.classes_:
-                probability = np.log(self.P_y[labels])
-                for features in X.columns:
-                    value = rows[features]
-                    if value in self.P[labels][features]:
-                        probability =probability+np.log(self.P[labels][features][value])
-                probs[labels].append(probability)
-
-        probs = pd.DataFrame(probs, columns=self.classes_)
-        probs = np.exp(probs)
-        probs = probs.div(probs.sum(axis=1), axis=0)
-        return probs
-
+        
 
 
