@@ -73,7 +73,7 @@ class my_normalizer:
             # Write your own code below
             mean_val=np.mean(x)
             std_dev=np.std(x)
-            offest=mean_val
+            offset =mean_val
 
         else:
             raise Exception("Unknown normlization.")
