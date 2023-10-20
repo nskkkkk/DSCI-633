@@ -3,6 +3,7 @@ import numpy as np
 from copy import deepcopy
 from pdb import set_trace
 import math
+                                                 #NO HINT FILE USED
 class my_AdaBoost:
 
     def __init__(self, base_estimator = None, n_estimators = 50, learning_rate=1):
@@ -56,19 +57,19 @@ class my_AdaBoost:
                 misclassified = np.array(predictions) != y
                 error = np.sum(misclassified * w)
 
-            # Calculate alpha for the current estimator.
+            # Calculate alpha value 
             if error <= 0.5:
                 alpha = self.learning_rate * math.log((1.0 - error) / error) + np.log(k - 1)
             else:
                 alpha = self.learning_rate * math.log((1.0 - error) / error)
             self.alpha.append(alpha)
 
-            # Update the sample weights.
+            
             updated_sample_weights = [w * np.exp(alpha) if isError else w for w, isError in zip(w, misclassified)]
             w = np.array(updated_sample_weights)
             w /= np.sum(w)
 
-        # Normalize alpha values to ensure they sum to 1.
+        
         sum_alpha = np.sum(self.alpha)
         self.alpha = [a / sum_alpha for a in self.alpha]
 
@@ -84,34 +85,34 @@ class my_AdaBoost:
     def predict_proba(self, X):
      
 
-        # Initialize an empty list to store the predictions from each base estimator.
-        list_predictions = []
+        
+        list_predictions = []         # Initialize an empty list 
 
-        for j in range(self.n_estimators):
-            # Predict using the j-th base estimator and append to the list.
+        for j in range(self.n_estimators):                
+                                                            # Predict using the j-th base estimator and append to the list.
             predictions = self.estimators[j].predict(X)
             list_predictions.append(predictions)
 
-        # Create a DataFrame to store the predictions from all base estimators.
-        dflist_predictions = pd.DataFrame(list_predictions)
+        
+        dflist_predictions = pd.DataFrame(list_predictions)    # Create a DataFrame to store the predictions
 
-        # Initialize a list to store the class probabilities.
-        probs = []
+        
+        probs = []             # Initialize a list to store the class probabilities.
 
         for col in range(dflist_predictions.shape[1]):
-                                                                                # Create a dictionary to accumulate class probabilities for each label.
+                                                                                
             pClass = {name: 0 for name in self.classes_}
 
             for row in range(dflist_predictions.shape[0]):
-                                                                                # Get the class prediction for the current row (sample).
+                                                                               
                 classname = dflist_predictions.iloc[row, col]
-                                                                                # Accumulate class probabilities using alpha values.
+                                                                                
                 pClass[classname] += self.alpha[row]
 
-                                                                                # Append the class probabilities to the list.
+                                                                                
             probs.append({name: pClass[name] for name in self.classes_})
 
-                                                                                # Create a DataFrame with columns representing class probabilities.
+                                                                                
         probs = pd.DataFrame(probs, columns=self.classes_)
 
         return probs
