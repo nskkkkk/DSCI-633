@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 from pdb import set_trace
-
 class my_KMeans:
 
     def __init__(self, n_clusters=8, initialization="k-means++", n_initializations=10, max_iterations=300, tolerance=1e-4):
