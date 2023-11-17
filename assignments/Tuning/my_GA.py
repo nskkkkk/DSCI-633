@@ -126,19 +126,14 @@ class my_GA:
         obj_a = self.evaluate(a)
         obj_b = self.evaluate(b)
         # write your own code below
-        leastone = False
-        allgood = True
-        for i in range(len(obj_a)):
-            if (obj_a[i] > obj_b[i]):
-                leastone = True
-            if (obj_a[i] < obj_b[i]):
-                allgood = False
-                break
+        any_better_than_b = any(obj_a[i] > obj_b[i] for i in range(len(obj_a)))
+        all_good = all(obj_a[i] <= obj_b[i] for i in range(len(obj_a)))
 
-        if allgood == True and leastone == True:
+        if all_good and any_better_than_b:
             return 1
         else:
             return -1
+
     def compete(self, pf_new, pf_best):
         # Compare and merge two pareto frontiers
         # If one point y in pf_best is binary dominated by another point x in pf_new
@@ -150,33 +145,30 @@ class my_GA:
         # Return True if pf_best is modified in the process, otherwise return False
         # Write your own code below
         modified = False
-        for i in range(len(pf_best)):
-            for j in range(len(pf_new)):
-                if self.is_better( pf_new[j],pf_best[i]) == 1:
-                    pf_best[i] = pf_new[j]
+        for i, best_point in enumerate(pf_best):
+            for j, new_point in enumerate(pf_new):
+                if self.is_better(new_point, best_point) == 1:
+                    pf_best[i] = new_point
                     pf_new.pop(j)
                     modified = True
                     break
-        to_add = []
-        for x in pf_new:
 
-            dup = False
-            for y1 in pf_best:
-                if self.is_better(y1, x) == 0:
-                    dup = True
-                    break
-            if dup:
+        to_add = []
+        for candidate_point in pf_new:
+            duplicate = any(self.is_better(existing_point, candidate_point) == 0 for existing_point in pf_best)
+            if duplicate:
                 continue
 
             if len(pf_best) > 0:
-                for y in pf_best:
-                    if self.is_better(y, x) == -1:
-                        pf_best.append(x)
+                for existing_point in pf_best:
+                    if self.is_better(existing_point, candidate_point) == -1:
+                        pf_best.append(candidate_point)
                         modified = True
                         break
             else:
-                pf_best.append(x)
+                pf_best.append(candidate_point)
                 modified = True
+
 
         return modified
 
@@ -217,22 +209,19 @@ class my_GA:
         # and generate a new point
         # repeat until self.generation_size points were generated
         # Write your own code below
-        def cross(a, b):
-            new_point = []
-            k = np.random.randint(len(a))
-            for i in range(len(a)):
-                if i < k:
-                    new_point.append(a[i])
-                else:
-                    new_point.append(b[i])
-            return tuple(new_point)
+        def crossover_individuals(parent_a, parent_b):
+            crossover_point = np.random.randint(len(parent_a))
+            new_individual = [parent_a[i] if i < crossover_point else parent_b[i] for i in range(len(parent_a))]
+            return tuple(new_individual)
 
-        to_add = []
+        new_individuals = []
         for _ in range(self.generation_size - len(self.generation)):
-            ids = np.random.choice(len(self.generation), 2, replace=False)
-            new_point = cross(self.generation[ids[0]], self.generation[ids[1]])
-            to_add.append(new_point)
-        self.generation.extend(to_add)
+            selected_parents = np.random.choice(len(self.generation), 2, replace=False)
+            child = crossover_individuals(self.generation[selected_parents[0]], self.generation[selected_parents[1]])
+            new_individuals.append(child)
+
+        self.generation.extend(new_individuals)
+
         ######################
         # check if size of generation is correct
         assert (len(self.generation) == self.generation_size)
@@ -247,20 +236,22 @@ class my_GA:
         #  value must also be integer.
         # write your own code below
 
-        for i, x in enumerate(self.generation):
-            new_x = list(x)
-            for j in range(len(x)):
+        for index, individual in enumerate(self.generation):
+            mutated_individual = list(individual)
+            for gene_index in range(len(individual)):
                 if np.random.random() < self.mutation_rate:
-                    boundary = self.decision_boundary[j]
-                    if type(boundary) == list:
-                        val = np.random.random() * (boundary[1] - boundary[0]) + boundary[0]
-                        if type(boundary[0]) == int:
-                            val = round(val)
-                        new_x[j] = val
+                    gene_boundary = self.decision_boundary[gene_index]
+                    if type(gene_boundary) == list:
+                        mutated_value = np.random.random() * (gene_boundary[1] - gene_boundary[0]) + gene_boundary[0]
+                        if type(gene_boundary[0]) == int:
+                            mutated_value = round(mutated_value)
+                        mutated_individual[gene_index] = mutated_value
                     else:
-                        new_x[j] = boundary[np.random.randint(len(boundary))]
-            self.generation[i] = tuple(new_x)
+                        mutated_individual[gene_index] = gene_boundary[np.random.randint(len(gene_boundary))]
+            self.generation[index] = tuple(mutated_individual)
+
         return self.generation
+
 
     def tune(self):
         # Main function of my_GA
