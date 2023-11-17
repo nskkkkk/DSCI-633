@@ -50,17 +50,22 @@ class my_GA:
         #  value must also be integer.
 
         self.generation = []
+
         for _ in range(self.generation_size):
-            x = []
-            for boundary in self.decision_boundary:
-                if type(boundary) == list:
-                    val = np.random.random() * (boundary[1] - boundary[0]) + boundary[0]
-                    if type(boundary[0]) == int:
-                        val = round(val)
-                    x.append(val)
+            new_point = []
+
+            for decision_range in self.decision_boundary:
+                if type(decision_range) == list:
+                    decision_value = np.random.random() * (decision_range[1] - decision_range[0]) + decision_range[0]
+                    if type(decision_range[0]) == int:
+                        decision_value = round(decision_value)
+                    new_point.append(decision_value)
                 else:
-                    x.append(boundary[np.random.randint(len(boundary))])
-            self.generation.append(tuple(x))
+                    random_index = np.random.randint(len(decision_range))
+                    new_point.append(decision_range[random_index])
+
+            self.generation.append(tuple(new_point))
+
         ######################
         # check if size of generation is correct
         assert (len(self.generation) == self.generation_size)
