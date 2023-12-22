@@ -52,9 +52,10 @@ class my_normalizer:
 
     def vector_norm(self, x):
         # Calculate the offset and scaler for input vector x
+        scaler=0
         if self.norm == "Min-Max":
             # Write your own code below
-            min_val=np.main(x)
+            min_val=np.min(x)
             max_val=np.max(x)
             offset = min_val
             scaler=max_val-min_val
